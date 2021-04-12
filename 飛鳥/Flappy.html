@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Flappy</title>
+	<style>
+		canvas {
+			margin: 0 auto;
+			display: block;
+			border: 1px solid black;
+		}
+	</style>
+
+</head>
+<body>
+	<canvas id="myCanvas" width="320" height="480">myCanvas</canvas>
+	<script>
+		const canvas = document.getElementById("myCanvas");
+		const ctx = canvas.getContext("2d");
+		const sprite = new Image();
+		sprite.src = "img/sprite.png";
+
+		const status = {
+			currect : 0,
+			getReady: 0,
+			game: 1,
+			gameOver: 2
+		}
+		//載入音效
+		const audioScore=new Audio();
+		audioScore.src="audio/sfx_point.wav";
+		const audioFlap=new Audio();
+		audioFlap.src="audio/sfx_flap.wav";
+		const audioHit=new Audio();
+		audioHit.src="audio/sfx_hit.wav";
+		const audioSwooshing=new Audio();
+		audioSwooshing.src="audio/sfx_swooshing.wav";
+		const audioDie=new Audio();
+		audioDie.src="audio/sfx_die.wav";
+
+		canvas.addEventListener("click", function(e){
+			switch(status.currect) {
+				case status.getReady:
+					status.currect = status.game;
+					audioSwooshing.play();
+					break;
+				case status.game:
+					bird.flap();
+					audioFlap.play();
+					break;
+				case status.gameOver:
+				 let rect = canvas.getBoundingClientRect();
+                 let clickX = e.clientX - rect.left;
+                 let clickY = e.clientY - rect.top;
+
+                 if(clickX>=btnStart.x&&
+                 	clickX<=btnStart.x+btnStart.width&&clickY>=btnStart.y&&
+                 	clickY<=btnStart.y+btnStart.height){
+                 	pipes.reset();
+                 	bird.reset();
+                 	score.reset();
+                 	status.currect = status.getReady;
+                 }
+					
+					break;
+			}
+		});
+		const btnStart = {
+         x:120,
+         y:250,
+         width: 83,
+         height: 29
+        }
+		let frames = 0;
+		const bird = {
+			// sx: 276,
+			// sy: 112,
+			animation : [
+				{sx: 276, sy : 112},
+				{sx: 276, sy : 139},
+				{sx: 276, sy : 164},
+				{sx: 276, sy : 139}
+			],
+			sw: 34,
+			sh: 26,
+			dx: canvas.width/4,
+			dy: canvas.height/4,
+			dw: 34,
+			dh: 26,
+			frame: 1,
+			gravity: 0.1,
+			jump: 5,
+			degree: 0*Math.PI/180,
+			speed: 0,
+			draw: function(){
+				let bird = this.animation[this.frame];
+				ctx.save();
+				ctx.translate(this.dx+this.sw/2, this.dy+this.sh/2-26);
+				ctx.rotate(this.degree);
+				ctx.drawImage(sprite, bird.sx, bird.sy, this.sw, this.sh, this.sw/2, -this.sh/2, this.dw, this.dh);
+				ctx.restore();
+				// ctx.strokeRect(this.dx, this.dy, this.dw, this.dh);
+			},
+			flap: function(){
+				this.speed -= this.jump;
+			},
+			update: function(){
+				// this.period = status.currect == status.getReady ? 10 : 5;
+				// this.frame += frames%this.period == 0 ? 1 : 0;
+				if(status.currect == status.getReady){
+					this.period = 10;
+				} else {
+					this.period = 5;
+				}
+				if(frames % this.period == 0){
+					this.frame ++;
+				} else{
+
+				}
+				this.frame = this.frame % this.animation.length;
+
+				if(status.currect == status.getReady) {
+					this.dy = 150;
+					this.degree = 0*Math.PI/180;
+					
+				}else {
+					this.speed += this.gravity;
+					this.dy += this.speed;
+
+					if(this.speed >= this.jump){
+						this.degree = 45*Math.PI/180;
+						this.frame  = 1;
+					}else {
+						this.degree = -45*Math.PI/180;
+					}
+
+					if(this.dy+this.dh >= canvas.height-fg.dh){
+						this.dy = canvas.height-fg.dh-this.dh;
+						if(status.currect == status.game) {
+							status.currect = status.gameOver;
+							audioDie.play();
+						}
+					}
+				}
+			},
+			reset: function(){
+				this.speed = 0;
+				//this.dy = canvas.height/2;
+			}
+		}
+		const bg = {
+			sx: 0,
+			sy: 0,
+			sw: 275,
+			sh: 226,
+			dx: 0,
+			dy: canvas.height - 226,
+			dw: 275,
+			dh: 226,
+			draw: function(){
+				ctx.drawImage(sprite, this.sx, this.sy, this.sw, this.sh, this.dx, this.dy, this.dw, this.dh);
+				ctx.drawImage(sprite, this.sx, this.sy, this.sw, this.sh, this.dx+this.sw, this.dy, this.dw, this.dh);
+			}
+		}
+		const fg = {
+			sx: 276,
+			sy: 0,
+			sw: 224,
+			sh: 112,
+			dx: 0,
+			dy: canvas.height - 112,
+			dw: 224,
+			dh: 112,
+			leftx: 2,
+			draw: function(){
+				ctx.drawImage(sprite, this.sx, this.sy, this.sw, this.sh, this.dx, this.dy, this.dw, this.dh);
+				ctx.drawImage(sprite, this.sx, this.sy, this.sw, this.sh, this.dx+this.sw, this.dy, this.dw, this.dh);
+			},
+			update: function(){
+				if(status.currect == status.game){
+					this.dx = (this.dx - this.leftx)%(this.dw/this.leftx);
+				}
+			}
+		}
+
+		const pipes = {
+			bottom:{
+				sx: 502,
+				sy: 0
+			},
+			top:{
+				sx: 553,
+				sy: 0
+			},
+			sw: 53,
+			sh: 400,
+			dx: canvas.width-53,
+			gap: 100,
+			leftx: 2,
+			maxY: -150,
+			position: [],//儲存繪製多個水管的座標位置
+			draw: function(){
+				for (var i = 0; i<this.position.length; i++)
+				{
+					let topX = this.position[i].x;
+					let topY = this.position[i].y;
+					let bottomY = this.position[i].y+this.sh+this.gap;
+
+					ctx.drawImage(sprite, this.top.sx, this.top.sy, this.sw, this.sh, topX, topY, this.sw, this.sh);
+					ctx.drawImage(sprite, this.bottom.sx,this.bottom.sy, this.sw,this.sh,topX,bottomY,this.sw,this.sh);
+					if(this.position[i].x+this.sw<=0){
+						this.position.shift();
+						score.value+=1;
+						audioScore.play();
+						score.best=Math.max(score.value,score.best);
+						localStorage.setItem("best",score.best);
+					}
+				}
+				// if(status.currect == status.game){
+				// 	ctx.drawImage(sprite, this.top.sx,this.top.sy, this.sw,this.sh,this.dx-this.sw,-200,this.sw,this.sh);
+				// 	ctx.drawImage(sprite, this.bottom.sx,this.bottom.sy, this.sw,this.sh,this.dx-this.sw,this.sh-200+this.gap,this.sw,this.sh);
+				// }
+			},
+			update: function(){
+				if(status.currect != status.game) return;
+				//水管重複出現
+				if(frames%100 == 0){
+					this.position.push({
+						x: canvas.width,
+						y: this.maxY * (Math.random()+1)
+					});
+				}
+				//設定水管X軸
+				for(var i = 0; i<this.position.length; i++){
+					this.position[i].x -= this.leftx;
+					//碰撞偵測
+					//上方偵測
+					if(bird.dx + bird.sw > this.position[i].x &&
+						bird.dx < this.position[i].x + this.sw && 
+						bird.dy + bird.sh > this.position[i].y &&
+						bird.dy < this.position[i].y + this.sh){
+							status.currect = status.gameOver;
+						audioHit.play();
+					}
+					//下方偵測
+					if(bird.dx + bird.sw > this.position[i].x &&
+						bird.dx < this.position[i].x + this.sw && 
+						bird.dy + bird.sh > (this.position[i].y + this.sh +this.gap) &&
+						bird.dy < (this.position[i].y + this.sh +this.gap) + this.sh){
+							status.currect = status.gameOver;
+						audioHit.play();
+					}
+				}
+
+
+				if(status.currect == status.game){
+					if(this.dx <= this.switch){
+						this.dx = canvas.width;
+					} else{
+						this.dx -= this.leftx;
+					}
+				}
+			},
+			reset:function(){
+				this.position=[];
+			}
+		}
+
+		const getReady = {
+			sx: 0,
+			sy: 228,
+			sw: 173,
+			sh: 162,
+			dx: canvas.width/2 - 174/2,
+			dy: 80,
+			dw: 173,
+			dh: 162,
+			draw: function(){
+				if(status.currect == status.getReady){
+					ctx.drawImage(sprite, this.sx, this.sy, this.sw, this.sh, this.dx, this.dy, this.dw, this.dh);
+				}
+			}
+		}
+		const score={
+			best:localStorage.getItem("best")||0,
+			value:0,
+			draw:function(){
+				ctx.fillStyle="white";
+				ctx.strokeStyle="black";
+				if(status.currect==status.game){
+					ctx.lineWidth=2;
+					ctx.font="35px 微軟正黑體";
+					ctx.fillText(this.value,canvas.width/2,50);
+					ctx.strokeText(this.value,canvas.width/2,50);
+
+				}else if(status.currect==status.gameOver){
+					ctx.font="25px 微軟正黑體";
+					ctx.fillText(this.value,225,180);
+					ctx.strokeText(this.value,225,180);
+					ctx.fillText(this.best,225,228);
+					ctx.strokeText(this.best,225,228);
+				}
+			},
+			reset:function(){
+				this.value=0;
+			}
+		}
+		const gameOver = {
+			sx: 174,
+			sy: 228,
+			sw: 226,
+			sh: 200,
+			dx: canvas.width/2 - 226/2,
+			dy: 80,
+			dw: 226,
+			dh: 200,
+			draw: function(){
+				if(status.currect == status.gameOver){
+					ctx.drawImage(sprite, this.sx, this.sy, this.sw, this.sh, this.dx, this.dy, this.dw, this.dh);
+				}
+			}
+		}
+		function draw(){
+			ctx.fillStyle = "lightskyblue";
+			ctx.fillRect(0, 0, canvas.width, canvas.height);
+			bg.draw();
+			fg.draw();
+			bird.draw();
+			if(status.currect == status.game)
+				pipes.draw();
+			getReady.draw();
+			gameOver.draw();
+			score.draw();
+		}
+
+		function update(){
+			bird.update();
+			fg.update();
+			pipes.update();
+		}
+
+		function reset(){
+			bird.reset();
+		}
+
+		function loop(){
+			update();
+			draw();
+			// reset();
+			frames++;
+			requestAnimationFrame(loop);
+		}
+		loop();
+	</script>
+</body>
+</html>

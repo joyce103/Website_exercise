@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style type="text/css">
+		canvas{
+			border: 1px solid black; 
+		}
+	</style>
+</head>
+<body>
+	<canvas id="mycanvas" width="600" height="400">
+		
+	</canvas>
+	<script type="text/javascript">
+		var canvas=document.getElementById("mycanvas");
+		var ctx=canvas.getContext("2d");
+		ctx.fillStyle="rgb(238,0,16)";
+		ctx.fillRect(0,0,600,400);
+        //月亮背後的矩形
+		ctx.fillStyle="rgb(228,3,17)";
+		ctx.fillRect(0,100,600,200);
+		//月亮
+		ctx.fillStyle="white";
+		ctx.beginPath();
+		ctx.arc(220,200,100,0,360*Math.PI/180,true);
+		ctx.fill();
+        //讓月亮形成彎月的圓形
+		ctx.fillStyle="rgb(228,3,17)";
+		ctx.beginPath();
+		ctx.arc(250,200,80,0,360*Math.PI/180,true);
+		ctx.fill();
+		//星形
+		ctx.fillStyle="white";
+		ctx.beginPath();
+		ctx.moveTo(330,191);
+		ctx.lineTo(330,251);
+		ctx.lineTo(385,176);
+        ctx.closePath();
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(296,204);
+        ctx.lineTo(385,234);
+        ctx.lineTo(351,185);
+        ctx.closePath();
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(330,157);
+        ctx.lineTo(330,196);
+        ctx.lineTo(351,187);
+        ctx.closePath();
+        ctx.fill();
+	</script>
+</body>
+</html>

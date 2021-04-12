@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+</head>
+<body>
+	<canvas id="myCanvas" width="500" height="500">
+		task1
+	</canvas>
+	<script type="text/javascript">
+		var canvas=document.getElementById("myCanvas");
+		var ctx=canvas.getContext("2d");
+        var time;
+        var i=0;
+        var j=0;
+		time=setInterval(function(){Close()},20);	
+		function Close(){
+			if(i<30){
+                ctx.fillStyle="yellow";
+		        ctx.beginPath();
+		        ctx.moveTo(150,150);
+		        ctx.arc(150,150,80,(330+i)*Math.PI/180,(28-i)*Math.PI/180,true);
+		        ctx.closePath();
+		        ctx.stroke();
+		        ctx.fill();
+		        i++;
+		    //眼睛
+		    ctx.fillStyle="black";
+		    ctx.beginPath();
+		    ctx.arc(150,110,12,0,360*Math.PI/180,true);
+		    ctx.fill();
+		    ctx.fillStyle="white";
+		    ctx.beginPath();
+		    ctx.arc(150,110,9,0,360*Math.PI/180,true);
+		    ctx.fill();
+		    ctx.fillStyle="black";
+		    ctx.beginPath();
+		    ctx.arc(150,110,6,0,360*Math.PI/180,true);
+		    ctx.fill();
+		    }
+		    if(i==30){
+		        ctx.fillStyle="white";
+		        ctx.beginPath();
+		        ctx.moveTo(150,150);
+		        ctx.arc(150,150,80,(360-j)*Math.PI/180,(1+j)*Math.PI/180,false);
+		        ctx.closePath();
+		        ctx.fill();
+		        ctx.stroke();
+		        ctx.fillStyle="white";
+		        ctx.beginPath();
+		        ctx.moveTo(150,150);
+		        ctx.arc(150,150,82,(360-j)*Math.PI/180,(1+j)*Math.PI/180,false);
+		        ctx.closePath();
+		        ctx.fill();
+		        j++;
+		        if(j==30){
+		        	i=0;
+		        	j=0;
+		        }
+		        }
+        }
+	</script>
+</body>
+</html>

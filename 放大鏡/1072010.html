@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+</head>
+<body>
+	<canvas id="myCanvas"></canvas>
+	<script type="text/javascript">
+		const canvas=document.getElementById("myCanvas");
+		const ctx=canvas.getContext("2d");
+		canvas.style.display="block";
+		canvas.style.margin="0 auto";
+		canvas.style.border="5px solid grey";
+		canvas.style.cursor="crosshair";
+		canvas.width=800;
+		canvas.height=550;
+		const img=new Image();
+		img.src="cat01.jpg";
+		const ctrP={
+			x:canvas.width/2,
+			y:canvas.height/2,
+			r:200
+		} 
+		//舊的區域
+		const oldArea={
+			x:ctrP.x-ctrP.r/2,//讓圖片從左上角開始,不然會從圓形中心點開始
+			y:ctrP.y-ctrP.r/2,
+			w:ctrP.r,
+			h:ctrP.r,
+			scale:2
+		}
+		//新的區域
+		const newArea={
+			x:ctrP.x-ctrP.r*oldArea.scale/2,
+			y:ctrP.y-ctrP.r*oldArea.scale/2,
+			w:ctrP.r*oldArea.scale,
+			h:ctrP.r*oldArea.scale,
+		}
+		canvas.onmousemove=function(e){
+			ctrP.x=e.clientX-canvas.getBoundingClientRect().left;
+			ctrP.y=e.clientY-canvas.getBoundingClientRect().top;
+		}
+
+		//儲存是否按下滑鼠鍵
+		let Lpressed = false; //左鍵
+		let Rpressed = false; //右鍵
+		canvas.onmousedown=function(e){ //滑鼠按下去執行的事件
+			if(e.which==1){ //按滑鼠左鍵
+				Lpressed = true;
+			}else if(e.which==3){ //按滑鼠右鍵
+				Rpressed=true;
+			}
+			
+		}
+		canvas.onmouseup=function(e){ //滑鼠放開執行的事件
+			if(e.which==1){
+				Lpressed = false;
+			}else if(e.which==3){
+				Rpressed=false;
+			}
+			
+		}
+		function move(){
+			oldArea.x=ctrP.x-ctrP.r/2;
+			oldArea.y=ctrP.y-ctrP.r/2;
+			newArea.x=ctrP.x-ctrP.r*oldArea.scale/2;
+			newArea.y=ctrP.y-ctrP.r*oldArea.scale/2;
+		}
+		function drawMG(){
+			ctx.save(); //要讓save和restore包著clip才不會裁切報背景圖片
+			ctx.beginPath();
+			ctx.arc(ctrP.x,ctrP.y,ctrP.r/2,0,Math.PI*2);
+			ctx.clip();
+			if(Lpressed){
+			ctx.drawImage(canvas,oldArea.x,oldArea.y,oldArea.w,oldArea.h,newArea.x,newArea.y,newArea.w,newArea.h); //將原本的區域放大後呈現
+			}
+
+			if(Rpressed){
+			ctx.drawImage(canvas,newArea.x,newArea.y,newArea.w,newArea.h,oldArea.x,oldArea.y,oldArea.w,oldArea.h); //將原本的區域縮小後呈現
+			}
+			ctx.closePath();
+			ctx.restore();
+			ctx.beginPath();
+			let gradient=ctx.createRadialGradient(
+				ctrP.x,ctrP.y,ctrP.r/2-5,
+				ctrP.x,ctrP.y,ctrP.r/2);
+			gradient.addColorStop(0,'rgba(0,0,0,0.5)');
+			gradient.addColorStop(0.5,'grey');
+			gradient.addColorStop(0.8,'blue');
+			gradient.addColorStop(1.0,'rgba(150,100,0,0.9)');
+			ctx.strokeStyle=gradient;
+			ctx.lineWidth=2;
+			ctx.arc(ctrP.x,ctrP.y,ctrP.r/2,0,Math.PI*2);
+			ctx.stroke();
+		}
+		function draw(){
+			ctx.drawImage(img,0,0,800,550);
+			drawMG();
+		}
+		function update(){
+			move();
+		}
+		function loop(){
+			draw();
+			update();
+			requestAnimationFrame(loop);
+		}
+		loop();
+
+
+	</script>
+</body>
+</html>

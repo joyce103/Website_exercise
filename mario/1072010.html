@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+</head>
+<body>
+	<canvas id="mycanvas" width="800" height="300"></canvas>
+	<img id="img" style="display:show">
+	<input type="button" id="btn" value="start">
+	<script type="text/javascript">
+		var canvas=document.getElementById("mycanvas");
+		var ctx=canvas.getContext("2d");
+		var Btn=document.getElementById("btn");
+
+		var img=document.createElement("img");
+		img.onload = function(){
+			
+			drawing();
+
+		}
+		img.src="mario.png";
+
+		var start=false, animation=null;
+        var frames=[
+            [0,0],
+            [32,0],
+            [64,0]
+        ];
+        var fWidth=32;
+        var fHeight=32;
+        var i=0;
+        var cX=canvas.width/2;
+        var cY=canvas.height/2;
+        Btn.onclick=function(){btnEvent()};
+        function btnEvent(){
+        	if(!start){
+        		animation=setInterval(drawing,100);
+        		Btn.value="stop";
+        		start=true;
+        	}else{
+        		Btn.value="start";
+        		clearInterval(animation);
+        		start=false;        	}
+        }
+        var walkX=0;
+        var dir=1;
+        function drawing(){
+        	ctx.clearRect(0,0,canvas.width,canvas.height);
+        	ctx.beginPath();
+        	ctx.moveTo(0,cY+32);
+        	ctx.lineTo(500,cY+32);
+        	ctx.stroke();
+        	ctx.closePath();
+            //ctx.transform(cX,cY);
+            //ctx.scale(dir,-1);
+        	ctx.drawImage(img,frames[i][0],frames[i][1],fWidth,fHeight,walkX-32,cY,fWidth,fHeight);
+        	
+        	i++;
+        	if(i>=3){
+        		i=0; 
+        	}
+        	walkX+=30;
+            if(walkX>=500){
+                dir=-1;
+                walkX*=(-1);
+            }
+
+        }
+
+	</script>
+</body>
+</html>
